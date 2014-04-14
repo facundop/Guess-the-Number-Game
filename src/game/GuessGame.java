@@ -2,70 +2,102 @@ package game;
 
 import java.util.Scanner;
 
-import utils.GuessNumberUtils;
-
 public class GuessGame {
+	private Scanner input = new Scanner(System.in);
+	private int numberToGuess;
+	private int guessedNumber;
+	private String playerName;
+	private boolean gameIsRunning = true;
 
-	// Class with all the methods required by the game
-	static GuessNumberUtils numberGenerator = new GuessNumberUtils();
-
-	// Scanner to handle input
-	static Scanner keyboard = new Scanner(System.in);
-
-	// This is where we store the number to guess
-	static int numberToGuess;
-
-	// This is where we store the number guessed by the player
-	static int guessedNumber;
-
-	// Number of tries - the idea is to handle a scoring system in the future
-	static int tries;
-
-	// Flag used to loop the game
-	static boolean gameEnded = false;
-
-	// This is where we store the player's name
-	static String playerName;
+	// This is the score - the idea is to handle a scoring system in the future
+	private int tries;
 
 	public static void main(String[] args) {
+		GuessGame game = new GuessGame();
+		game.run();
+	}
 
-		// Asks for player's name
-		playerName = GuessNumberUtils.getPlayerName(keyboard);
+	private void run() {
+		playerName = getPlayerName(input);
+		while (gameIsRunning) {
+			// We initialize the # of tries. To do: scoring system.
+			tries = 0;
 
-		while (!gameEnded) {
-			// We initialize the score (tries)
-			tries = 1;
-			
 			// Generates a random number. To do: ask the players for the range
-			numberToGuess = numberGenerator.getRandomNumber(1, 100);
+			numberToGuess = getRandomNumber(1, 100);
 
-			// Debugging only. Remove this line to actually play the game.
+			// Debugging only. Remove this line to play the game.
 			System.out.println(numberToGuess);
 
 			System.out.println(playerName
 					+ ", I've picked a number between 1 and 100, guess it!");
 
-			guessedNumber = GuessNumberUtils.guessNumber(keyboard);
-
-			while (guessedNumber != numberToGuess) {
-				GuessNumberUtils.isNumberCorrect(numberToGuess, guessedNumber);
+			do {
+				guessedNumber = guessNumber(input);
+				isNumberLowOrHigh(numberToGuess, guessedNumber);
 				tries++;
-				guessedNumber = GuessNumberUtils.guessNumber(keyboard);
-			}
+			} while (guessedNumber != numberToGuess);
 
 			if (guessedNumber == numberToGuess) {
-				if (tries == 1) {
-					System.out.println("Good job. You guessed it in 1 try.");
-				} else {
-					System.out.println("Good job. You guessed it in " + tries
-							+ " tries.");
-				}
-
+				System.out.println("Good job. You guessed it in " + tries
+						+ (tries == 1 ? " try." : " tries"));
 			}
 
-			gameEnded = GuessNumberUtils.playAgain(keyboard);
+			gameIsRunning = playAgain(input);
 		}
-		keyboard.close();
+		input.close();
 	}
 
+	/*
+	 * Method to generate a random number in a specific range
+	 */
+	private int getRandomNumber(int min, int max) {
+		return min + (int) (Math.random() * ((max - min) + 1));
+	}
+
+	/*
+	 * Method to ask for the player's name
+	 */
+	private String getPlayerName(Scanner keyboard) {
+		System.out.println("Hi there! What's your name?");
+		String playerName = keyboard.nextLine();
+		System.out.println("Hi " + playerName + ", let's play!");
+		return playerName;
+	}
+
+	/*
+	 * Method to ask for a number to guess.
+	 */
+	private int guessNumber(Scanner keyboard) {
+		System.out.println("Pick a number: ");
+		return Integer.parseInt(keyboard.nextLine());
+	}
+
+	/*
+	 * Method to check if the guessed number is too low or too high
+	 */
+	private void isNumberLowOrHigh(int numberToGuess, int guessedNumber) {
+		if (numberToGuess < guessedNumber) {
+			System.out.println("Too high. Guess again.");
+		}
+		if (numberToGuess > guessedNumber) {
+			System.out.println("Too low. Guess again.");
+		}
+	}
+
+	/*
+	 * Method to keep playing or finish it.
+	 */
+	private boolean playAgain(Scanner keyboard) {
+		boolean playAgain;
+		System.out.println("Play again? y/n");
+		playAgain = keyboard.nextLine().toLowerCase().trim().startsWith("y");
+		if (playAgain) {
+			System.out.println("Let's play again!");
+			return true;
+		} else {
+			System.out.println("Thanks for playing. Good bye!");
+			return false;
+		}
+	}
 }
